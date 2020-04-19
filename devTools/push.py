@@ -6,7 +6,6 @@ import format
 
 cmt = input('Commit message: ')
 
-
 os.system('git add .')
 
 os.system(f'git commit -m \"{cmt}\"')

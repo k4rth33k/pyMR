@@ -3,7 +3,6 @@
 import os
 import pathlib
 
-
 _ = [p.unlink() for p in pathlib.Path('.').rglob('*.py[co]')]
 _ = [p.rmdir() for p in pathlib.Path('.').rglob('__pycache__')]
 
