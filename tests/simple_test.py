@@ -1,3 +1,7 @@
+# root/test/simple_test.py
+
 from pyMR import Master
 
-master = Master()
+
+def test_main():
+    master = Master()

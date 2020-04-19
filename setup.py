@@ -1,3 +1,5 @@
+# root/setup.py
+
 from setuptools import setup
 setup(name='pyMR',
       version='0.1',
