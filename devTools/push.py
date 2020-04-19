@@ -11,4 +11,4 @@ os.system('git add .')
 
 os.system(f'git commit -m "{cmt}"')
 
-os.system('git commit origin master')
+os.system('git push origin master')
