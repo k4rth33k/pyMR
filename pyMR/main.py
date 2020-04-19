@@ -1,5 +1,6 @@
 # root/pyMR/main.py
 
+
 class Master(object):
     """Master class for creating and running workers"""
 
