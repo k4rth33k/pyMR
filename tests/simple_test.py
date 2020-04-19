@@ -1,3 +1,3 @@
-from pymr import Master
+from pyMR import Master
 
 master = Master()

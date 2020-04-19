@@ -6,5 +6,5 @@ setup(name='pyMR',
       author='k4rth33k',
       author_email='kartheek2000mike@gmail.com',
       license='MIT',
-      packages=['pymr'],
+      packages=['pyMR'],
       zip_safe=False)
