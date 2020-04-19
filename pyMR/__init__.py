@@ -1,2 +1,2 @@
-from .Master import Master
-from .Master import Worker
+from .main import Master
+from .main import Worker
