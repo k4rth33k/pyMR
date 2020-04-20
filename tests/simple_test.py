@@ -4,4 +4,4 @@ from pyMR import Master
 
 
 def test_main():
-    master = Master()
+    master = Master(__name__)

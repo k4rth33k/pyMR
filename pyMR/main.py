@@ -3,9 +3,9 @@
 
 class Master(object):
     """Master class for creating and running workers"""
-    def __init__(self):
+    def __init__(self, name):
         super(Master, self).__init__()
-        pass
+        self.name = name
 
 
 class Worker(object):
