@@ -11,6 +11,7 @@ class NotIterableException(Exception):
 class SizeException(Exception):
     pass
 
+
 class threadsafe_iter:
     """Takes an iterator/generator and makes it thread-safe by
     serializing call to the `next` method of given iterator/generator.
@@ -26,15 +27,17 @@ class threadsafe_iter:
         with self.lock:
             return self.it.next()
 
+
 def threadsafe_generator(f):
     """A decorator that takes a generator function and makes it thread-safe.
     """
     def g(*a, **kw):
         return threadsafe_iter(f(*a, **kw))
-    return g           
+
+    return g
+
 
 class Chunks():
-
     def __init__(self, data, num_chunks=10, overflow='last'):
         self.data = data
         self.num_chunks = num_chunks
@@ -99,7 +102,6 @@ class Chunks():
 
 
 class Chunks2:
-
     def __init__(self, data, num_chunks=10):
         self.data = data
         self.num_chunks = num_chunks

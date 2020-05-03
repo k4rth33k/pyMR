@@ -11,15 +11,14 @@ def map_(x):
 def red_(x, y):
     return x + y
 
+
 # 1000000000
 def test_main():
     master = Master(num_workers=30)
     # master.create_job(data=range(100),
     #                   map_fn=lambda x: sum(x),
     #                   red_fn=lambda x, y: x + y)
-    master.create_job(data=list(range(1000000000)),
-                      map_fn=map_,
-                      red_fn=red_)
+    master.create_job(data=list(range(1000000000)), map_fn=map_, red_fn=red_)
 
     master.start()
     result = master.result()

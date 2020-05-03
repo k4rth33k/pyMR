@@ -2,7 +2,6 @@
 
 
 class Stack(object):
-
     def __init__(self, master):
         super(Stack, self).__init__()
         self._ = []

@@ -8,7 +8,6 @@ from .utils import Stack
 
 class Master(object):
     """Master class for creating and running workers"""
-
     def __init__(self, num_workers, split_ratio=0.8):
         super(Master, self).__init__()
 
@@ -51,12 +50,16 @@ class Master(object):
         processes = []
 
         # while (generator is not empty):
-        self.workers = [Worker(id=_, data=next(self.data_gen),
-                               job=self.map_fn, type='MAP') for _ in range(1, self.num_workers)]
+        self.workers = [
+            Worker(id=_, data=next(self.data_gen), job=self.map_fn, type='MAP')
+            for _ in range(1, self.num_workers)
+        ]
 
         with concurrent.futures.ThreadPoolExecutor() as executor:
-            results = [executor.submit(worker.run)
-                       for worker in self.workers[:self.map_workers]]
+            results = [
+                executor.submit(worker.run)
+                for worker in self.workers[:self.map_workers]
+            ]
 
         # self.map_results = [f.result()
         #                for f in concurrent.futures.as_completed(results)]
@@ -82,6 +85,7 @@ class Master(object):
 
     def __repr__(self):
         return str(self)
+
 
 # class Master(object):
 #     """Master class for creating and running workers"""
@@ -133,7 +137,6 @@ class Master(object):
 
 class Worker(object):
     """Worker class for running the job"""
-
     def __init__(self, id, data, job, type):
 
         super(Worker, self).__init__()
