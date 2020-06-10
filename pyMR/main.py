@@ -74,7 +74,6 @@ class Master(object):
 
         data_empty = False
         converted = False
-        verif = None
 
         # Initialize worker objects
         self.__workers = [
@@ -88,7 +87,6 @@ class Master(object):
 
         while not self.__verify():
             count = 0
-            # self.queue.dequeue()
 
             if not data_empty:
                 # Setting up map workers
@@ -97,7 +95,6 @@ class Master(object):
                         worker.set_data(next(self.data_gen))
                         count += 1
                     except StopIteration:
-                        # print('Exception')
                         data_empty = True
 
             if data_empty and not converted:
@@ -139,7 +136,7 @@ class Master(object):
         return self.validate
 
     def __str__(self):
-        return f'<Master obj at {id(self)}>'
+        return '<Master obj at {}>'.format(id(self))
 
     def __repr__(self):
         return str(self)

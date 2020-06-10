@@ -1,7 +1,6 @@
 # root/pyMR/chunk.py
 
 from collections import Iterable
-import copy
 from itertools import tee
 
 
@@ -26,7 +25,7 @@ class Chunks():
 
         try:
             self.len_ = len(data)
-        except:
+        except TypeError:
             self.len_ = sum([1 for _ in self.len_data])
 
         print(self.len_)
