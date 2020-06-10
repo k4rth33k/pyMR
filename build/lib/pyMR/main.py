@@ -8,12 +8,13 @@ from .utils import Stack
 
 class Master(object):
     """Master class for creating and running workers"""
-    def __init__(self, num_workers, split_ratio=0.8):
+    def __init__(self, num_workers, split_ratio=0.8, load_each=20):
         super(Master, self).__init__()
 
         self.data_gen = None
         self.num_workers = num_workers
         self.workers = []
+        self.load_each = load_each
 
         self.map_results = []
         self.reduce_stack = Stack(self)
@@ -26,11 +27,14 @@ class Master(object):
         self.map_fn = map_fn
         self.red_fn = red_fn
 
-        self.data_gen = Chunks(data=data,
-                               num_chunks=self.num_workers).get_chunks_gen()
+        # self.data_gen = Chunks(data=data,
+        # num_chunks=self.num_workers * self.load_each).get_chunks_gen()
 
-        # self.data_gen = iter(Chunks2(data=data,
-        # num_chunks=self.map_workers))
+        self.data_gen = iter(
+            Chunks2(data=data, num_chunks=self.num_workers * self.load_each))
+        print(next(self.data_gen))
+        print(next(self.data_gen))
+        print(len(next(self.data_gen)))
 
         # self.workers = [Worker(id=_, data_gen=self.data_gen,
         #                        job=map_fn, type='MAP',
@@ -50,16 +54,19 @@ class Master(object):
         processes = []
 
         # while (generator is not empty):
-        self.workers = [
-            Worker(id=_, data=next(self.data_gen), job=self.map_fn, type='MAP')
-            for _ in range(1, self.num_workers)
-        ]
-
-        with concurrent.futures.ThreadPoolExecutor() as executor:
-            results = [
-                executor.submit(worker.run)
-                for worker in self.workers[:self.map_workers]
+        for __ in range(self.load_each):
+            self.workers = [
+                Worker(id=_,
+                       data=next(self.data_gen),
+                       job=self.map_fn,
+                       type='MAP') for _ in range(1, self.num_workers)
             ]
+
+            with concurrent.futures.ThreadPoolExecutor() as executor:
+                results = [
+                    executor.submit(worker.run)
+                    for worker in self.workers[:self.map_workers]
+                ]
 
         # self.map_results = [f.result()
         #                for f in concurrent.futures.as_completed(results)]

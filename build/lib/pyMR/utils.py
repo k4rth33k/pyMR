@@ -5,6 +5,7 @@ class Stack(object):
     def __init__(self, master):
         super(Stack, self).__init__()
         self._ = []
+        self.master = master
 
     def push(self, elem):
         self._.append(elem)

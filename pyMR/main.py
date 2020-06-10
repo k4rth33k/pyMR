@@ -1,84 +1,142 @@
 # root/pyMR/main.py
 
-from .chunk import Chunks2
 from .chunk import Chunks
 import concurrent.futures
-from .utils import Stack
+from .utils import Queue
+
+
+class ArgumentError(Exception):
+    pass
 
 
 class Master(object):
     """Master class for creating and running workers"""
-    def __init__(self, num_workers, split_ratio=0.8):
+    def __init__(self,
+                 num_workers,
+                 split_ratio=0.75,
+                 granularity=3,
+                 verbose=True):
+        """
+        Constructor for Master, master orchestrates the execution of workers
+
+        Args:
+            num_workers (int): Number of workers needed to be spawn
+            split_ratio (float): Ratio of map to reduce workers
+            granularity (int): # Chunks needed by each map worker
+            verbose (bool): set to True to print logss
+        Returns:
+            Nothing
+        Raises:
+            ArgumentError: if arguments are not of right type
+        """
         super(Master, self).__init__()
 
-        self.data_gen = None
+        self.__workers = []
+
         self.num_workers = num_workers
-        self.workers = []
+        self.verbose = verbose
+        self.granularity = granularity
+        self.__map_num = int(split_ratio * num_workers)
+        self.__red_num = self.num_workers - self.__map_num
+        self.queue = Queue()
 
-        self.map_results = []
-        self.reduce_stack = Stack(self)
-
-        self.map_workers = int(split_ratio * num_workers)
-        self.reduce_workers = num_workers - self.map_workers
+        self.validate = None
 
     def create_job(self, data, map_fn, red_fn):
+        """
+        Initializes chunks and map/reduce functions
+
+        Args:
+            data (Iterable): Data to be processed(Generator is highly recommended)
+            map_fn (Function): Function (not lambda) to be applied on chunks
+            red_fn (Function): Function (not lambda) to be applied on results
+        Returns:
+        Raises:
+        """
 
         self.map_fn = map_fn
         self.red_fn = red_fn
 
-        self.data_gen = Chunks(data=data,
-                               num_chunks=self.num_workers).get_chunks_gen()
-
-        # self.data_gen = iter(Chunks2(data=data,
-        # num_chunks=self.map_workers))
-
-        # self.workers = [Worker(id=_, data_gen=self.data_gen,
-        #                        job=map_fn, type='MAP',
-        # master=self) for _ in range(1, self.map_workers + 1)]
-
-        # self.workers += [Worker(id=_, data_gen=self.data_gen,
-        #                         job=red_fn, type='REDUCE',
-        #                         master=self) for _ in range(self.map_workers + 1,
-        # self.num_workers + 1)]
-
-        # Priming
-        # self.workers = [Worker(id=_, data=next(self.data_gen),
-        # job=map_fn, type='MAP') for _ in range(1, self.num_workers)]
+        chunks = Chunks(data=data,
+                        num_chunks=self.__map_num * self.granularity)
+        self.data_gen = chunks.get_chunks_gen()
 
     def start(self):
-        print('Job has started!')
-        processes = []
+        """
+        Starts mapReduce execition loop, refer[link]
 
-        # while (generator is not empty):
-        self.workers = [
-            Worker(id=_, data=next(self.data_gen), job=self.map_fn, type='MAP')
-            for _ in range(1, self.num_workers)
+        Args:
+        Returns:
+        Raises:
+        """
+
+        print('Job has started!' * self.verbose, end='\n' * self.verbose)
+
+        data_empty = False
+        converted = False
+        verif = None
+
+        # Initialize worker objects
+        self.__workers = [
+            Worker(id=_, job=self.map_fn, type='MAP', verbose=self.verbose)
+            for _ in range(1, self.__map_num + 1)
+        ]
+        self.__workers += [
+            Worker(id=_, job=self.red_fn, type='RED', verbose=self.verbose)
+            for _ in range(self.__map_num + 1, self.__red_num + 1)
         ]
 
-        with concurrent.futures.ThreadPoolExecutor() as executor:
-            results = [
-                executor.submit(worker.run)
-                for worker in self.workers[:self.map_workers]
-            ]
+        while not self.__verify():
+            count = 0
+            # self.queue.dequeue()
 
-        # self.map_results = [f.result()
-        #                for f in concurrent.futures.as_completed(results)]
-        # self.map_results = [f.add_done_callback(self.take_result)
-        # for f in concurrent.futures.as_completed(results)]
+            if not data_empty:
+                # Setting up map workers
+                for worker in self.__workers[:self.__map_num]:
+                    try:
+                        worker.set_data(next(self.data_gen))
+                        count += 1
+                    except StopIteration:
+                        # print('Exception')
+                        data_empty = True
 
-        for f in concurrent.futures.as_completed(results):
-            f.add_done_callback(self.take_result)
+            if data_empty and not converted:
+                for worker in self.__workers[:self.__map_num]:
+                    worker.type = 'RED'
+                    worker.job = self.red_fn
+                converted = True
 
-        print()
+            # Setting up reduce workers
+            for worker in self.__workers:
+                if self.queue.size() >= 2 and worker.type == 'RED':
+                    count += 1
+                    A, B = self.queue.dequeue(), self.queue.dequeue()
+                    worker.set_data([A, B])
 
-    def take_result(self, future):
+            with concurrent.futures.ProcessPoolExecutor() as executor:
+                results = [
+                    executor.submit(worker.run)
+                    for worker in self.__workers[:count]
+                ]
+
+            for f in concurrent.futures.as_completed(results):
+                f.add_done_callback(self.__take_result)
+
+    def __take_result(self, future):
         result = future.result()
-        self.map_results.append(result)
+        self.queue.enqueue(result)
 
-        # print('\n', result)
+    def __verify(self):
+        if self.queue.size() == 1:
+            if self.validate:
+                return id(self.validate) == id(self.queue.peek())
+            else:
+                self.validate = self.queue.peek()
+
+        return False
 
     def result(self):
-        return self.map_results
+        return self.validate
 
     def __str__(self):
         return f'<Master obj at {id(self)}>'
@@ -87,91 +145,40 @@ class Master(object):
         return str(self)
 
 
-# class Master(object):
-#     """Master class for creating and running workers"""
-
-#     def __init__(self, num_workers):
-#         super(Master, self).__init__()
-
-#         self.data_gen = None
-#         self.num_workers = num_workers
-#         self.workers = []
-
-#         self.map_results = []
-#         self.reduce_stack = Stack(self)
-
-#     def create_job(self, data, map_fn, red_fn):
-
-#         self.data = Chunks2(data)
-#         self.map_fn = map_fn
-#         self.red_fn = red_fn
-
-#     def start(self):
-#         print('Job has started!')
-#         processes = []
-
-#         with concurrent.futures.ProcessPoolExecutor() as executor:
-#             results = executor.map(self.map_fn, self.data)
-
-#         # self.map_results = [f.result()
-#         #                for f in concurrent.futures.as_completed(results)]
-#         # self.map_results = [f.add_done_callback(self.take_result)
-#         # for f in concurrent.futures.as_completed(results)]
-
-#         self.results = [result for result in results]
-#         # print(self.results)
-
-#     def take_result(self, future):
-#         result = future.result()
-#         print('\n', result)
-
-#     def result(self):
-#         return self.results
-
-#     def __str__(self):
-#         return f'<Master obj at {id(self)}>'
-
-#     def __repr__(self):
-#         return str(self)
-
-
 class Worker(object):
     """Worker class for running the job"""
-    def __init__(self, id, data, job, type):
+    def __init__(self, id, job, type, verbose):
+        """
+        Constructor for Worker class
+        Takes in:
+        ID -> Number
+        job -> a function
+        type -> 'MAP' or 'REDUCE'
+        """
 
         super(Worker, self).__init__()
         self.job = job  # Function
-        # self.data_gen = data_gen
-        self.data = data
         self.id = id
         self.type = type
-        self.result = None
-        self.working = False
+        self.verbose = verbose
 
-    def run(self, A=None, B=None):
+    def set_data(self, data):
+        """
+        To set data before parallel execution
+        """
+        self.data = data
 
-        print(f'{self.type} Worker {self.id} is working!!', end='\r')
-        self.working = True
-        # data = None
+    def run(self):
+
+        print(f'{self.type} Worker {self.id} is working' * self.verbose,
+              end='\r' * self.verbose)
 
         if self.type == 'MAP':
-            # try:
-            #     while data is None:
-            #         data = next(self.data_gen)
-            #         print(self.id, data)
-
-            # except Exception as e:
-            #     print(e)
-
-            # self.result = self.job(data)
-            self.result = self.job(self.data)
-
-            # return self.result
+            result = self.job(self.data)
         else:
-            self.result = self.job(A, B)
+            result = self.job(self.data.pop(), self.data.pop())
 
-        self.working = False
-        return self.result
+        return result
 
     def __str__(self):
         return f'<Worker - {self.type} - {self.id} at {id(self)}>'
