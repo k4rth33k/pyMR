@@ -1,21 +1,6 @@
 # root/pyMR/utils.py
 
 
-class Stack(object):
-    def __init__(self, master):
-        super(Stack, self).__init__()
-        self._ = []
-        self.master = master
-
-    def push(self, elem):
-        self._.append(elem)
-        if len(self._) == 2:
-            master.reduce(self.pop(), self.pop())
-
-    def pop(self):
-        return self._.pop()
-
-
 class Queue(object):
     """A simple queue to store results"""
     def __init__(self):
