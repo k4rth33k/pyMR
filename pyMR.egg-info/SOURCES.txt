@@ -1,0 +1,11 @@
+README.md
+setup.py
+pyMR/__init__.py
+pyMR/chunk.py
+pyMR/main.py
+pyMR/utils.py
+pyMR.egg-info/PKG-INFO
+pyMR.egg-info/SOURCES.txt
+pyMR.egg-info/dependency_links.txt
+pyMR.egg-info/not-zip-safe
+pyMR.egg-info/top_level.txt
