@@ -28,7 +28,6 @@ class Chunks():
         except TypeError:
             self.len_ = sum([1 for _ in self.len_data])
 
-        print(self.len_)
         if self.len_ < self.num_chunks:
             raise SizeException("len(data) should be more than num_chunks")
 

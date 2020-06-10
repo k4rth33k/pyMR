@@ -167,8 +167,8 @@ class Worker(object):
 
     def run(self):
 
-        print(f'{self.type} Worker {self.id} is working' * self.verbose,
-              end='\r' * self.verbose)
+        print('{} Worker {} is working' * self.verbose,
+              end='\r' * self.verbose).format(self.type, self.id)
 
         if self.type == 'MAP':
             result = self.job(self.data)
@@ -176,9 +176,3 @@ class Worker(object):
             result = self.job(self.data.pop(), self.data.pop())
 
         return result
-
-    def __str__(self):
-        return f'<Worker - {self.type} - {self.id} at {id(self)}>'
-
-    def __repr__(self):
-        return str(self)
