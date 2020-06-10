@@ -10,4 +10,5 @@ os.system('git add .')
 
 os.system(f'git commit -m \"{cmt}\"')
 
-os.system('git push origin master')
+branch = input('Branch: ')
+os.system('git push origin {branch}')
