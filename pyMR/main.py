@@ -167,8 +167,9 @@ class Worker(object):
 
     def run(self):
 
-        print('{} Worker {} is working' * self.verbose,
-              end='\r' * self.verbose).format(self.type, self.id)
+        print(('{} Worker {} is working'.format(self.type, self.id)) *
+              self.verbose,
+              end='\r' * self.verbose)
 
         if self.type == 'MAP':
             result = self.job(self.data)
