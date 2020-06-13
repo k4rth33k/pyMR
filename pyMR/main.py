@@ -1,7 +1,7 @@
 # root/pyMR/main.py
 
 from .chunk import Chunks
-import concurrent.futures
+import concurrent.futures as cf
 from .utils import Queue
 
 
@@ -15,7 +15,8 @@ class Master(object):
                  num_workers,
                  split_ratio=0.75,
                  granularity=3,
-                 verbose=True):
+                 verbose=True,
+                 threaded=False):
         """
         Constructor for Master, master orchestrates the execution of workers
 
@@ -41,6 +42,8 @@ class Master(object):
         self.queue = Queue()
 
         self.validate = None
+        self.executor = cf.ThreadPoolExecutor(
+        ) if threaded else cf.ProcessPoolExecutor()
 
     def create_job(self, data, map_fn, red_fn):
         """
@@ -110,18 +113,15 @@ class Master(object):
                     A, B = self.queue.dequeue(), self.queue.dequeue()
                     worker.set_data([A, B])
 
-            with concurrent.futures.ProcessPoolExecutor() as executor:
-                results = [
-                    executor.submit(worker.run)
-                    for worker in self.__workers[:count]
-                ]
+            futures = [
+                self.executor.submit(worker.run)
+                for worker in self.__workers[:count]
+            ]
 
-            for f in concurrent.futures.as_completed(results):
-                f.add_done_callback(self.__take_result)
+            for f in cf.as_completed(futures):
+                self.queue.enqueue(f.result())
 
-    def __take_result(self, future):
-        result = future.result()
-        self.queue.enqueue(result)
+        self.executor.shutdown()
 
     def __verify(self):
         if self.queue.size() == 1:
