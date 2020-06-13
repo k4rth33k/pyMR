@@ -2,7 +2,7 @@
 
 from setuptools import setup
 setup(name='pyParallelMR',
-      version='0.1',
+      version='0.1.2',
       description='A python package to convert CPU-bound tasks ' +
       'to parallel mapReduce jobs.',
       url='https://github.com/k4rth33k/pyMR',
