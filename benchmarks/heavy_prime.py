@@ -1,7 +1,6 @@
 from pyMR import Master
 from math import sqrt
 import tracemalloc
-import time
 import datetime
 import pandas as pd
 import tracemalloc
@@ -60,20 +59,24 @@ def main():
     ])
 
     for i in range(2, 10):
-        print(f'Finding prime numbers in range - {10 ** i}')
-        with_time, with_peek = with_pymr(10**i, i)
-        without_time, without_peek = without_pymr(10**i)
-        df_ = pd.DataFrame(
-            [[10**i, without_time, with_time, without_peek, with_peek]],
-            columns=[
-                'Range', 'Raw (sec)', 'pyMR (sec)', 'Raw peek (MB)',
-                'pyMR peek (MB)'
-            ])
-        df = df.append(df_)
+        try:
+            print(f'Finding prime numbers in range - {10 ** i}')
+            with_time, with_peek = with_pymr(10**i, i)
+            without_time, without_peek = without_pymr(10**i)
+            df_ = pd.DataFrame(
+                [[10**i, without_time, with_time, without_peek, with_peek]],
+                columns=[
+                    'Range', 'Raw (sec)', 'pyMR (sec)', 'Raw peek (MB)',
+                    'pyMR peek (MB)'
+                ])
+            df = df.append(df_)
+        except KeyboardInterrupt:
+            break
 
     print('-' * 50)
     print(df)
     print('-' * 50)
+    df.to_csv('Prime Benchmark.csv')
 
 
 if __name__ == '__main__':
