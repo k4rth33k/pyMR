@@ -4,7 +4,7 @@ import os
 import clear
 import format
 
-# os.system('pip install . --no-cache-dir')
+os.system('pip install . --no-cache-dir')
 
 cmt = input('Commit message: ')
 
