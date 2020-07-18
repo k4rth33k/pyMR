@@ -2,8 +2,8 @@
 
 ## Simple Map Reduce package in python that supports parallel processing
 
-![Python package](https://github.com/k4rth33k/pyMR/workflows/Python%20package/badge.svg?branch=master)
-
+![Python package](https://github.com/k4rth33k/pyMR/workflows/Python%20package/badge.svg?branch=master) ![enter image description here](https://raw.githubusercontent.com/k4rth33k/pyMR/master/badges/pip-install.svg) ![enter image description here](https://raw.githubusercontent.com/k4rth33k/pyMR/master/badges/python_ver.svg) ![enter image description here](https://raw.githubusercontent.com/k4rth33k/pyMR/master/badges/version.svg)
+  
 ![Experiment results](https://k4rth33k.github.io/files/PrimesPlain.png)
 ## In a nutshell
  - pyParallelMR leverages the fact that greater speeds in computation can be achieved using more memory. 
