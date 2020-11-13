@@ -35,7 +35,7 @@ def red_wc(kv1, kv2):
 
 
 def main():
-	file_path = '/path/to/file'
+    file_path = '/path/to/file'
     master = Master(num_workers=9) # Initialize engine
     master.create_job(data=open(file_path, encoding='utf-8'),
                       map_fn=map_wc, red_fn=red_wc) # Submit the data
