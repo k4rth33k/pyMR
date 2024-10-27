@@ -9,7 +9,7 @@
 ## In a nutshell
  - pyParallelMR leverages the fact that greater speeds in computation can be achieved using more memory. 
  - It is not applicable to problems which require optimized solutions (IoT for example).
- - A simple queue based map reduce engine which executes tasks in a batch wise parallel manner. (forcible fanciness :wink:) 
+ - A simple queue based map reduce engine which executes tasks in a batch wise parallel manner.
 
 ## Usage
 ```python
