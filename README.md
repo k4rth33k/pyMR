@@ -57,6 +57,3 @@ if __name__ == '__main__':
  
  ### Finding primes in a given range
  ![enter image description here](https://k4rth33k.github.io/files/PrimesTradeoff.png)
-The objective of this painstaking ordeal of heavy multiprocessing and a bit of bad python code (sarcasm :stuck_out_tongue_closed_eyes:) is to achieve the high speeds with respect to CPUs completely ignoring the memory usage.
-
-# Other results will be added soon and thoughts and contributions are always welcome :purple_heart:
